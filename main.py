@@ -15,8 +15,8 @@ class BaseSprite(Widget):
     Important properties to add value upon initialization:
     - sprite_text
     - sprite_color
-    - sprite_center_x
-    - sprite_center_y
+    - x
+    - y
 
     """
     sprite = ObjectProperty(None)
@@ -25,15 +25,17 @@ class BaseSprite(Widget):
         super(BaseSprite, self).__init__(**kwargs)
         self.sprite.text = kwargs.get('sprite_text', self.sprite.text)
         self.sprite.color = kwargs.get('sprite_color', self.sprite.color)
-        self.sprite.center_x = kwargs.get('sprite_center_x', self.sprite.center_x)
-        self.sprite.center_y = kwargs.get('sprite_center_y', self.sprite.center_y)
+        self.sprite.pos = self.pos
 
     def move(self, dx, dy):
         """ Move by the given amount (dx) (dy)
 
+        NOTE: When the widget moves, all its children should move too.
+
         """
-        self.sprite.center_x += dx
-        self.sprite.center_y += dy
+        self.x += dx
+        self.y += dy
+        self.sprite.pos = self.pos
 
 
 class PyRogueGame(Widget):
@@ -50,14 +52,6 @@ class PyRogueGame(Widget):
 
         self.load_initial_widgets()
 
-        self.keypress_label.text = 'parent w: {} h: {}\nx: {}, y: {}\nkey: {}'.format(
-            0,
-            0,
-            self._widget('player').sprite.center_x,
-            self._widget('player').sprite.center_y,
-            '()'
-        )
-
     def close(self):
         self._keyboard.unbind(on_key_down=self.press)
         self._keyboard = None
@@ -68,15 +62,15 @@ class PyRogueGame(Widget):
                 id='player',
                 sprite_text='@',
                 sprite_color=[255, 255, 255, 1],
-                sprite_center_x=self.width / 2,
-                sprite_center_y=self.height / 2
+                x=self.width / 2,
+                y=self.height / 2
             ),
             BaseSprite(
                 id='npc',
                 sprite_text='@',
                 sprite_color=[255, 255, 0, 1],
-                sprite_center_x=self.width / 2 - 20,
-                sprite_center_y=self.height / 2
+                x=self.width / 2 - 20,
+                y=self.height / 2
             )
         ]
 
@@ -95,26 +89,22 @@ class PyRogueGame(Widget):
         self.keypress_label.text = 'parent w: {} h: {}\nx: {}, y: {}\nkey: {}'.format(
             self.parent.width,
             self.parent.height,
-            self._widget('player').sprite.center_x,
-            self._widget('player').sprite.center_y,
+            self._widget('player').x,
+            self._widget('player').y,
             keycode
         )
 
         if keycode[1] == 'left' or keycode[1] == 'h':
-            move_p = self.move_speed if self._widget('player').sprite.center_x > 0 else 0
-            self._widget('player').sprite.center_x -= move_p
+            self._widget('player').move(-self.move_speed, 0)
 
         if keycode[1] == 'right' or keycode[1] == 'l':
-            move_p = self.move_speed if self._widget('player').sprite.center_x < self.parent.width else 0
-            self._widget('player').sprite.center_x += move_p
+            self._widget('player').move(self.move_speed, 0)
 
         if keycode[1] == 'up' or keycode[1] == 'k':
-            move_p = self.move_speed if self._widget('player').sprite.center_y < self.parent.height else 0
-            self._widget('player').sprite.center_y += move_p
+            self._widget('player').move(0, self.move_speed)
 
         if keycode[1] == 'down' or keycode[1] == 'j':
-            move_p = self.move_speed if self._widget('player').sprite.center_y > 0 else 0
-            self._widget('player').sprite.center_y -= move_p
+            self._widget('player').move(0, -self.move_speed)
 
 
 class PyRogueApp(App):
