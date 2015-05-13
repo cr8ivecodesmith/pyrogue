@@ -33,16 +33,20 @@ class MapTile(Widget):
 
         if value:
             self.tile.color = self.color_dark_wall
+            self.tile.text = '#'
         else:
             self.tile.color = self.color_dark_ground
+            self.tile.text = '.'
 
     def set_blocked(self, value):
         self.blocked = value
 
         if self.block_sight:
             self.tile.color = self.color_dark_wall
+            self.tile.text = '#'
         else:
             self.tile.color = self.color_dark_ground
+            self.tile.text = '.'
 
 
 class BaseSprite(Widget):
@@ -132,7 +136,6 @@ class PyRogueGame(Widget):
             self.width,
             self.height,
             self._widget('player').pos,
-            self._widget('player').y,
             keycode
         )
 
