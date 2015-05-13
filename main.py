@@ -9,6 +9,42 @@ from kivy.uix.widget import Widget
 from kivy.properties import ObjectProperty
 
 
+class MapTile(Widget):
+    """ MapTile object
+
+    """
+    tile = ObjectProperty(None)
+    color_dark_wall = [0, 0, 100, 1]
+    color_dark_ground = [50, 50, 150, 1]
+
+    def __init__(self, blocked, block_sight=None, **kwargs):
+        super(MapTile, self).__init__(**kwargs)
+        self.blocked = blocked
+        self.block_sight = block_sight or blocked
+        self.tile.pos = self.pos
+
+        if self.block_sight:
+            self.tile.color = self.color_dark_wall
+        else:
+            self.tile.color = self.color_dark_ground
+
+    def set_block_sight(self, value=None):
+        self.block_sight = bool(value)
+
+        if value:
+            self.tile.color = self.color_dark_wall
+        else:
+            self.tile.color = self.color_dark_ground
+
+    def set_blocked(self, value):
+        self.blocked = value
+
+        if self.block_sight:
+            self.tile.color = self.color_dark_wall
+        else:
+            self.tile.color = self.color_dark_ground
+
+
 class BaseSprite(Widget):
     """ BaseSprite Object
 
@@ -33,15 +69,15 @@ class BaseSprite(Widget):
         NOTE: When the widget moves, all its children should move too.
 
         """
-        self.x += dx
-        self.y += dy
+        self.center_x += dx
+        self.center_y += dy
         self.sprite.pos = self.pos
 
 
 class PyRogueGame(Widget):
 
     keypress_label = ObjectProperty(None)
-    move_speed = 10
+    move_speed = 20
 
     def __init__(self, **kwargs):
         super(PyRogueGame, self).__init__(**kwargs)
@@ -50,14 +86,27 @@ class PyRogueGame(Widget):
         self._keyboard = Window.request_keyboard(self.close, self)
         self._keyboard.bind(on_key_down=self.press)
 
-        self.load_initial_widgets()
-
     def close(self):
         self._keyboard.unbind(on_key_down=self.press)
         self._keyboard = None
 
     def load_initial_widgets(self):
+        # NOTE: The last item on the list becomes the widget with the highest
+        #       z-order.
         widgets = [
+            Widget(
+                id='game_map',
+                width=self.width,
+                height=self.height,
+                pos=self.pos
+            ),
+            BaseSprite(
+                id='npc',
+                sprite_text='@',
+                sprite_color=[255, 255, 0, 1],
+                x=self.width / 2 - self.move_speed,
+                y=self.height / 2
+            ),
             BaseSprite(
                 id='player',
                 sprite_text='@',
@@ -65,31 +114,24 @@ class PyRogueGame(Widget):
                 x=self.width / 2,
                 y=self.height / 2
             ),
-            BaseSprite(
-                id='npc',
-                sprite_text='@',
-                sprite_color=[255, 255, 0, 1],
-                x=self.width / 2 - 20,
-                y=self.height / 2
-            )
         ]
 
         for widget in widgets:
             self.add_widget(widget)
 
-    def _widget(self, widget_id):
+    def _widget(self, widget_id, restrict=True, loopback=False):
         widget = None
-        for obj in self.walk(restrict=True):
+        for obj in self.walk(restrict=restrict, loopback=loopback):
             if obj.id == widget_id:
                 widget = obj
                 break
         return widget
 
     def press(self, keyboard, keycode, text, modifiers):
-        self.keypress_label.text = 'parent w: {} h: {}\nx: {}, y: {}\nkey: {}'.format(
-            self.parent.width,
-            self.parent.height,
-            self._widget('player').x,
+        self.keypress_label.text = 'wxh: {}x{}\nx,y: {}\nkey: {}'.format(
+            self.width,
+            self.height,
+            self._widget('player').pos,
             self._widget('player').y,
             keycode
         )
@@ -106,10 +148,32 @@ class PyRogueGame(Widget):
         if keycode[1] == 'down' or keycode[1] == 'j':
             self._widget('player').move(0, -self.move_speed)
 
+    def make_map(self):
+        game_map = self._widget('game_map')
+        for y in range(0, game_map.height, self.move_speed):
+            for x in range(0, game_map.width, self.move_speed):
+                game_map.add_widget(MapTile(
+                    id='tile:{},{}'.format(x, y),
+                    blocked=False,
+                    x=x,
+                    y=y
+                ))
+
+        # NOTE: Set some tiles to blocking for testing
+        for ctr, widget in enumerate(game_map.walk(restrict=True)):
+            if 'tile' not in str(widget.id):
+                continue
+            widget.set_block_sight(True)
+            widget.set_blocked(True)
+            if ctr > (game_map.width + game_map.height) / 2:
+                break
+
 
 class PyRogueApp(App):
     def build(self):
         game = PyRogueGame()
+        game.load_initial_widgets()
+        game.make_map()
         return game
 
 

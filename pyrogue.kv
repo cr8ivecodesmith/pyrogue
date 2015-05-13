@@ -1,8 +1,22 @@
 #:kivy 1.9.0
 
 
-<BaseSprite>
+<MapTile>:
+    tile: tile
+    width: 20
+    height: 20
+
+    Label:
+        id: tile
+        font_size: 10
+        text: str(".")
+
+
+<BaseSprite>:
     sprite: sprite
+    width: 20
+    height: 20
+
     Label:
         id: sprite
         font_size: 20
@@ -10,6 +24,8 @@
 
 <PyRogueGame>:
     keypress_label: keypress_label
+    width: 20 * 24
+    height: 20 * 24
 
     Label:
         id: keypress_label
