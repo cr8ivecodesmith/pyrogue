@@ -1,0 +1,9 @@
+*.py[co]
+__pycache__
+
+*.db
+
+*.tmp
+*.log
+*.swp
+__MACOSX
