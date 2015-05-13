@@ -1,19 +1,15 @@
 #:kivy 1.9.0
 
-<RogueSprite>:
+
+<BaseSprite>
+    sprite: sprite
     Label:
+        id: sprite
         font_size: 20
-        center: self.parent.center
-        text: str("@")
 
 
 <PyRogueGame>:
-    player: rogue_sprite
     keypress_label: keypress_label
-
-    RogueSprite:
-        id: rogue_sprite
-        center: self.parent.center
 
     Label:
         id: keypress_label
