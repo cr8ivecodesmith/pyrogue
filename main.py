@@ -6,6 +6,7 @@ kivy.require('1.9.0')
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.uix.widget import Widget
+from kivy.uix.label import Label
 from kivy.properties import ObjectProperty
 
 
@@ -49,24 +50,16 @@ class MapTile(Widget):
             self.tile.text = '.'
 
 
-class BaseSprite(Widget):
+class BaseSprite(Label):
     """ BaseSprite Object
 
     Important properties to add value upon initialization:
-    - sprite_text
-    - sprite_color
+    - text
+    - color
     - x
     - y
 
     """
-    sprite = ObjectProperty(None)
-
-    def __init__(self, **kwargs):
-        super(BaseSprite, self).__init__(**kwargs)
-        self.sprite.text = kwargs.get('sprite_text', self.sprite.text)
-        self.sprite.color = kwargs.get('sprite_color', self.sprite.color)
-        self.sprite.pos = self.pos
-
     def move(self, dx, dy):
         """ Move by the given amount (dx) (dy)
 
@@ -75,7 +68,6 @@ class BaseSprite(Widget):
         """
         self.center_x += dx
         self.center_y += dy
-        self.sprite.pos = self.pos
 
 
 class PyRogueGame(Widget):
@@ -106,15 +98,13 @@ class PyRogueGame(Widget):
             ),
             BaseSprite(
                 id='npc',
-                sprite_text='@',
-                sprite_color=[255, 255, 0, 1],
+                color=[255, 255, 0, 1],
                 x=self.width / 2 - self.move_speed,
                 y=self.height / 2
             ),
             BaseSprite(
                 id='player',
-                sprite_text='@',
-                sprite_color=[255, 255, 255, 1],
+                color=[255, 255, 255, 1],
                 x=self.width / 2,
                 y=self.height / 2
             ),
