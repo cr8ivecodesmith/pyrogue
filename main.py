@@ -141,6 +141,22 @@ class PyRogueGame(Widget):
         if keycode[1] == 'down' or keycode[1] == 'j':
             self._widget('player').move(0, -self.move_speed)
 
+        if keycode[1] == 'y':
+            self._widget('player').move(-self.move_speed, 0)
+            self._widget('player').move(0, self.move_speed)
+
+        if keycode[1] == 'u':
+            self._widget('player').move(self.move_speed, 0)
+            self._widget('player').move(0, self.move_speed)
+
+        if keycode[1] == 'b':
+            self._widget('player').move(-self.move_speed, 0)
+            self._widget('player').move(0, -self.move_speed)
+
+        if keycode[1] == 'n':
+            self._widget('player').move(self.move_speed, 0)
+            self._widget('player').move(0, -self.move_speed)
+
     def make_map(self):
         game_map = self._widget('game_map')
         for y in range(0, game_map.height, self.move_speed):
