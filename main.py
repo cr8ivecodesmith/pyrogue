@@ -122,6 +122,11 @@ class PyRogueGame(Widget):
         return widget
 
     def press(self, keyboard, keycode, text, modifiers):
+        """ Key controls
+
+        Preferred key controls: http://www.roguebasin.com/index.php?title=Preferred_Key_Controls
+
+        """
         self.keypress_label.text = 'wxh: {}x{}\nx,y: {}\nkey: {}'.format(
             self.width,
             self.height,
